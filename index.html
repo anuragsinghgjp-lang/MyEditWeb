@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>My Edit</title>
 
     <style>
@@ -14,45 +13,42 @@
         }
 
         body {
-            background: #000;
+            background: black;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
         }
 
         video {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            background: #000;
         }
 
         #playButton {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-
-            padding: 16px 30px;
+            z-index: 10;
+            padding: 18px 35px;
             border: none;
             border-radius: 50px;
-
             background: white;
             color: black;
-
             font-size: 18px;
             font-weight: bold;
-
             cursor: pointer;
-            z-index: 10;
-
-            box-shadow: 0 0 30px rgba(255,255,255,0.4);
         }
 
-        #playButton.hidden {
+        #error {
+            position: fixed;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+            color: white;
+            text-align: center;
+            font-family: Arial;
             display: none;
         }
     </style>
@@ -60,46 +56,54 @@
 
 <body>
 
-    <video id="edit" playsinline>
-        <source src="edit.mp4" type="video/mp4">
-        Your browser does not support video.
+    <video id="video" playsinline preload="auto">
+        <source src="./edit.mp4" type="video/mp4">
     </video>
 
-    <button id="playButton">
-        ▶ Tap to Play
-    </button>
+    <button id="playButton">▶ TAP TO PLAY</button>
+
+    <div id="error">
+        Video load nahi ho rahi. Check karo ki file ka naam <b>edit.mp4</b> hai.
+    </div>
 
     <script>
-        const video = document.getElementById("edit");
+        const video = document.getElementById("video");
         const button = document.getElementById("playButton");
+        const error = document.getElementById("error");
 
-        // Try autoplay WITH SOUND
+        // Page open hote hi sound ke saath play try
         video.muted = false;
 
-        video.play()
-            .then(() => {
-                button.classList.add("hidden");
-            })
-            .catch(() => {
-                // Browser blocked autoplay with sound
-                button.classList.remove("hidden");
-            });
+        video.play().then(() => {
+            button.style.display = "none";
+        }).catch(() => {
+            // Browser ne sound autoplay block kiya
+            button.style.display = "block";
+        });
 
-        // User taps button
-        button.addEventListener("click", async () => {
+        // TAP TO PLAY
+        button.addEventListener("click", async function () {
+
             try {
                 video.muted = false;
+                video.volume = 1.0;
+
                 await video.play();
 
-                button.classList.add("hidden");
+                button.style.display = "none";
 
-                // Try fullscreen on mobile
-                if (video.requestFullscreen) {
-                    video.requestFullscreen().catch(() => {});
-                }
-            } catch (error) {
-                console.log("Video could not play:", error);
+            } catch (e) {
+                console.log(e);
+
+                error.innerHTML =
+                    "Video play nahi ho pa rahi. Video file/check karo.";
+                error.style.display = "block";
             }
+        });
+
+        // Video missing/error
+        video.addEventListener("error", function () {
+            error.style.display = "block";
         });
     </script>
 
